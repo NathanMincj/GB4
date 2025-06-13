@@ -1,0 +1,25 @@
+import speech_recognition as sr
+import time
+import serial
+
+def OOKmodulation(bit_train, port='/dev/cu.usbmodem1401', baudrate=9600,
+                  spray_duration=0.2, symbol_interval=4.0):
+    
+    print(f" Connecting to Arduino on {port}...")
+    ser = serial.Serial(port, baudrate)
+    time.sleep(2)
+    print("Connection established.")
+
+    print("Starting OOK transmission...")
+    for i, bit in enumerate(bit_train):
+        print(f"Transmitting bit {i+1}/{len(bit_train)}: {bit}")
+        if bit == 1:
+            ser.write(b'1')  # Spray ON
+            time.sleep(spray_duration)
+            ser.write(b'0')  # Spray OFF
+        else:
+            ser.write(b'0')  # Stay OFF
+        time.sleep(symbol_interval - spray_duration if bit == 1 else symbol_interval)
+
+    ser.close()
+    print("Transmission complete.")
